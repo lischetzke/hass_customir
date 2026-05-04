@@ -1,0 +1,21 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.venv*/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Local maintainer scratch space
+/scratch/
+/tools/_irdb/
+/tools/_flipper/

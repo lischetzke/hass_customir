@@ -1,0 +1,101 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Custom IR",
+        "description": "Wähle ein Gerät aus dem mitgelieferten Katalog und den IR-Proxy-Sender, der dessen Befehle übertragen soll.",
+        "data": {
+          "device_key": "Gerät",
+          "infrared_entity_id": "IR-Proxy-Sender"
+        },
+        "data_description": {
+          "device_key": "Geräte werden aus dem mitgelieferten Katalog sowie aus <config>/customir_devices/ geladen.",
+          "infrared_entity_id": "Eine Entität der Kern-Integration „Infrared“ (z. B. ein ESPHome IR Mate)."
+        }
+      }
+    },
+    "abort": {
+      "no_emitters": "Es ist kein IR-Proxy-Sender geladen. Richte zuerst die Kern-Integration „Infrared“ samt eines Senders ein (z. B. ein ESPHome IR-Blaster).",
+      "no_devices": "Keine Geräte im Katalog gefunden. Lege Gerätedateien unter <config>/customir_devices/ ab oder installiere den mitgelieferten Katalog.",
+      "unknown_device": "Das ausgewählte Gerät ist nicht mehr im Katalog. Bitte erneut versuchen.",
+      "already_configured": "Dieses Gerät ist für diesen IR-Proxy bereits konfiguriert."
+    }
+  },
+  "entity": {
+    "button": {
+      "a_1":           {"name": "Ausgang A: HDMI 1"},
+      "a_2":           {"name": "Ausgang A: HDMI 2"},
+      "a_3":           {"name": "Ausgang A: HDMI 3"},
+      "a_4":           {"name": "Ausgang A: HDMI 4"},
+      "a_off":         {"name": "Ausgang A aus"},
+      "ad":            {"name": "Audiodeskription"},
+      "av_mode":       {"name": "AV-Modus"},
+      "b_1":           {"name": "Ausgang B: HDMI 1"},
+      "b_2":           {"name": "Ausgang B: HDMI 2"},
+      "b_3":           {"name": "Ausgang B: HDMI 3"},
+      "b_4":           {"name": "Ausgang B: HDMI 4"},
+      "b_off":         {"name": "Ausgang B aus"},
+      "back":          {"name": "Zurück"},
+      "blue":          {"name": "Blau"},
+      "channel_down":  {"name": "Programm −"},
+      "channel_up":    {"name": "Programm +"},
+      "down":          {"name": "Unten"},
+      "energy_saving": {"name": "Energiesparen"},
+      "exit":          {"name": "Beenden"},
+      "fast_forward":  {"name": "Vorlauf"},
+      "green":         {"name": "Grün"},
+      "guide":         {"name": "Programmübersicht"},
+      "hdmi_1":        {"name": "HDMI 1"},
+      "hdmi_2":        {"name": "HDMI 2"},
+      "hdmi_3":        {"name": "HDMI 3"},
+      "hdmi_4":        {"name": "HDMI 4"},
+      "home":          {"name": "Startseite"},
+      "info":          {"name": "Info"},
+      "input":         {"name": "Eingang"},
+      "left":          {"name": "Links"},
+      "list":          {"name": "Senderliste"},
+      "live_tv":       {"name": "Live-TV"},
+      "mark":          {"name": "Markieren"},
+      "menu":          {"name": "Menü"},
+      "mute":          {"name": "Stumm"},
+      "nav_down":      {"name": "Unten"},
+      "nav_left":      {"name": "Links"},
+      "nav_right":     {"name": "Rechts"},
+      "nav_up":        {"name": "Oben"},
+      "num_0":         {"name": "0"},
+      "num_1":         {"name": "1"},
+      "num_2":         {"name": "2"},
+      "num_3":         {"name": "3"},
+      "num_4":         {"name": "4"},
+      "num_5":         {"name": "5"},
+      "num_6":         {"name": "6"},
+      "num_7":         {"name": "7"},
+      "num_8":         {"name": "8"},
+      "num_9":         {"name": "9"},
+      "ok":            {"name": "OK"},
+      "pause":         {"name": "Pause"},
+      "play":          {"name": "Wiedergabe"},
+      "power":         {"name": "Ein/Aus"},
+      "power_off":     {"name": "Ausschalten"},
+      "power_on":      {"name": "Einschalten"},
+      "q_menu":        {"name": "Schnellmenü"},
+      "q_view":        {"name": "Schnellansicht"},
+      "ratio":         {"name": "Bildformat"},
+      "record":        {"name": "Aufnahme"},
+      "red":           {"name": "Rot"},
+      "rewind":        {"name": "Rücklauf"},
+      "right":         {"name": "Rechts"},
+      "settings":      {"name": "Einstellungen"},
+      "simplink":      {"name": "SimpLink"},
+      "sleep":         {"name": "Sleep-Timer"},
+      "source":        {"name": "Quelle"},
+      "stop":          {"name": "Stopp"},
+      "subtitle":      {"name": "Untertitel"},
+      "t_opt":         {"name": "Videotext-Optionen"},
+      "up":            {"name": "Oben"},
+      "volume_down":   {"name": "Leiser"},
+      "volume_up":     {"name": "Lauter"},
+      "yellow":        {"name": "Gelb"}
+    }
+  }
+}

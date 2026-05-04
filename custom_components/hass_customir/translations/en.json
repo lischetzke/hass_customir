@@ -1,0 +1,101 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Custom IR",
+        "description": "Pick a device from the bundled catalog and the IR proxy emitter that should send its commands.",
+        "data": {
+          "device_key": "Device",
+          "infrared_entity_id": "IR proxy emitter"
+        },
+        "data_description": {
+          "device_key": "Devices loaded from the bundled catalog and from <config>/customir_devices/.",
+          "infrared_entity_id": "Any entity from the core 'infrared' integration (e.g. an ESPHome IR Mate)."
+        }
+      }
+    },
+    "abort": {
+      "no_emitters": "No IR proxy emitters are loaded. Set up the core 'Infrared' integration plus an emitter (e.g. an ESPHome IR blaster) first.",
+      "no_devices": "No devices found in the catalog. Add device files under <config>/customir_devices/ or install the bundled catalog.",
+      "unknown_device": "The selected device is no longer in the catalog. Try again.",
+      "already_configured": "This device is already configured for that IR proxy."
+    }
+  },
+  "entity": {
+    "button": {
+      "a_1":           {"name": "Output A: HDMI 1"},
+      "a_2":           {"name": "Output A: HDMI 2"},
+      "a_3":           {"name": "Output A: HDMI 3"},
+      "a_4":           {"name": "Output A: HDMI 4"},
+      "a_off":         {"name": "Output A off"},
+      "ad":            {"name": "Audio description"},
+      "av_mode":       {"name": "AV mode"},
+      "b_1":           {"name": "Output B: HDMI 1"},
+      "b_2":           {"name": "Output B: HDMI 2"},
+      "b_3":           {"name": "Output B: HDMI 3"},
+      "b_4":           {"name": "Output B: HDMI 4"},
+      "b_off":         {"name": "Output B off"},
+      "back":          {"name": "Back"},
+      "blue":          {"name": "Blue"},
+      "channel_down":  {"name": "Channel down"},
+      "channel_up":    {"name": "Channel up"},
+      "down":          {"name": "Down"},
+      "energy_saving": {"name": "Energy saving"},
+      "exit":          {"name": "Exit"},
+      "fast_forward":  {"name": "Fast forward"},
+      "green":         {"name": "Green"},
+      "guide":         {"name": "Guide"},
+      "hdmi_1":        {"name": "HDMI 1"},
+      "hdmi_2":        {"name": "HDMI 2"},
+      "hdmi_3":        {"name": "HDMI 3"},
+      "hdmi_4":        {"name": "HDMI 4"},
+      "home":          {"name": "Home"},
+      "info":          {"name": "Info"},
+      "input":         {"name": "Input"},
+      "left":          {"name": "Left"},
+      "list":          {"name": "List"},
+      "live_tv":       {"name": "Live TV"},
+      "mark":          {"name": "Mark"},
+      "menu":          {"name": "Menu"},
+      "mute":          {"name": "Mute"},
+      "nav_down":      {"name": "Down"},
+      "nav_left":      {"name": "Left"},
+      "nav_right":     {"name": "Right"},
+      "nav_up":        {"name": "Up"},
+      "num_0":         {"name": "0"},
+      "num_1":         {"name": "1"},
+      "num_2":         {"name": "2"},
+      "num_3":         {"name": "3"},
+      "num_4":         {"name": "4"},
+      "num_5":         {"name": "5"},
+      "num_6":         {"name": "6"},
+      "num_7":         {"name": "7"},
+      "num_8":         {"name": "8"},
+      "num_9":         {"name": "9"},
+      "ok":            {"name": "OK"},
+      "pause":         {"name": "Pause"},
+      "play":          {"name": "Play"},
+      "power":         {"name": "Power"},
+      "power_off":     {"name": "Power off"},
+      "power_on":      {"name": "Power on"},
+      "q_menu":        {"name": "Q.Menu"},
+      "q_view":        {"name": "Q.View"},
+      "ratio":         {"name": "Aspect ratio"},
+      "record":        {"name": "Record"},
+      "red":           {"name": "Red"},
+      "rewind":        {"name": "Rewind"},
+      "right":         {"name": "Right"},
+      "settings":      {"name": "Settings"},
+      "simplink":      {"name": "SimpLink"},
+      "sleep":         {"name": "Sleep timer"},
+      "source":        {"name": "Source"},
+      "stop":          {"name": "Stop"},
+      "subtitle":      {"name": "Subtitle"},
+      "t_opt":         {"name": "Teletext options"},
+      "up":            {"name": "Up"},
+      "volume_down":   {"name": "Volume down"},
+      "volume_up":     {"name": "Volume up"},
+      "yellow":        {"name": "Yellow"}
+    }
+  }
+}
