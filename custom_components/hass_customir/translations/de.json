@@ -2,23 +2,48 @@
   "config": {
     "step": {
       "user": {
-        "title": "Custom IR",
-        "description": "Wähle ein Gerät aus dem mitgelieferten Katalog und den IR-Proxy-Sender, der dessen Befehle übertragen soll.",
+        "title": "Custom IR — Hersteller & Sender wählen",
+        "description": "{device_count} Gerät(e) von {manufacturer_count} Hersteller(n) geladen. Wähle zuerst den Hersteller, dann den IR-Proxy-Sender, der dessen Befehle übertragen soll. Beide Felder unterstützen Suche beim Tippen. Eigene Geräte werden hinzugefügt, indem eine YAML- oder JSON-Datei unter `<config>/customir_devices/` abgelegt und der Dialog erneut geöffnet wird.",
         "data": {
-          "device_key": "Gerät",
+          "manufacturer": "Hersteller",
           "infrared_entity_id": "IR-Proxy-Sender"
         },
         "data_description": {
-          "device_key": "Geräte werden aus dem mitgelieferten Katalog sowie aus <config>/customir_devices/ geladen.",
-          "infrared_entity_id": "Eine Entität der Kern-Integration „Infrared“ (z. B. ein ESPHome IR Mate)."
+          "manufacturer": "Geräte sind nach Hersteller gruppiert. Im Eintrag „Other“ landen Geräte ohne Herstellerangabe (typischerweise eigene YAML-Dateien).",
+          "infrared_entity_id": "Eine Entität der Kern-Integration „Infrared“ (z. B. ein ESPHome IR Mate, ein Broadlink RM-Hub)."
+        }
+      },
+      "device": {
+        "title": "Custom IR — Gerätemodell wählen",
+        "description": "Wähle das {manufacturer}-Modell. {device_count} Modell(e) verfügbar. Jeder Eintrag zeigt die Anzahl seiner Befehle.",
+        "data": {
+          "device_key": "Gerät"
+        },
+        "data_description": {
+          "device_key": "Nach dem Bestätigen werden eine Button-Entität pro Befehl sowie eine Remote-Entität angelegt."
         }
       }
     },
     "abort": {
       "no_emitters": "Es ist kein IR-Proxy-Sender geladen. Richte zuerst die Kern-Integration „Infrared“ samt eines Senders ein (z. B. ein ESPHome IR-Blaster).",
       "no_devices": "Keine Geräte im Katalog gefunden. Lege Gerätedateien unter <config>/customir_devices/ ab oder installiere den mitgelieferten Katalog.",
+      "no_devices_for_manufacturer": "Für den gewählten Hersteller sind keine Geräte vorhanden — bitte den Assistenten neu starten.",
       "unknown_device": "Das ausgewählte Gerät ist nicht mehr im Katalog. Bitte erneut versuchen.",
       "already_configured": "Dieses Gerät ist für diesen IR-Proxy bereits konfiguriert."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Custom IR — Optionen",
+        "description": "Kompatibilitätseinstellungen für ältere IR-Sender-Integrationen.",
+        "data": {
+          "legacy_timings": "Legacy-Timing-Paare (Kompatibilität)"
+        },
+        "data_description": {
+          "legacy_timings": "Nur aktivieren, wenn beim Drücken eines Buttons der Fehler ‚'int' object has no attribute 'high_us'‘ erscheint. In diesem Modus werden Timing(high_us=…, low_us=…)-Objekte gesendet statt der modernen vorzeichenbehafteten µs-Werte — ein Workaround für Sender-Integrationen, die noch auf infrared-protocols < 2.0.0 setzen. Die saubere Lösung ist ein Update des Senders."
+        }
+      }
     }
   },
   "entity": {

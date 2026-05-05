@@ -2,23 +2,48 @@
   "config": {
     "step": {
       "user": {
-        "title": "Custom IR",
-        "description": "Pick a device from the bundled catalog and the IR proxy emitter that should send its commands.",
+        "title": "Custom IR — pick manufacturer & emitter",
+        "description": "{device_count} device(s) from {manufacturer_count} manufacturer(s) loaded. Pick the manufacturer first, then the IR proxy emitter that should send its commands. Both fields support type-ahead search. To add a custom device, drop a YAML or JSON file into `<config>/customir_devices/` and re-open this dialog.",
         "data": {
-          "device_key": "Device",
+          "manufacturer": "Manufacturer",
           "infrared_entity_id": "IR proxy emitter"
         },
         "data_description": {
-          "device_key": "Devices loaded from the bundled catalog and from <config>/customir_devices/.",
-          "infrared_entity_id": "Any entity from the core 'infrared' integration (e.g. an ESPHome IR Mate)."
+          "manufacturer": "Devices are grouped by manufacturer. The 'Other' bucket contains entries without a manufacturer set (typically user-supplied YAML).",
+          "infrared_entity_id": "Any entity from the core 'infrared' integration (e.g. an ESPHome IR Mate, a Broadlink RM hub)."
+        }
+      },
+      "device": {
+        "title": "Custom IR — pick device model",
+        "description": "Pick the {manufacturer} device to control. {device_count} model(s) available. Each entry shows how many commands the device exposes.",
+        "data": {
+          "device_key": "Device"
+        },
+        "data_description": {
+          "device_key": "After submission one button entity per command, plus one remote entity, will be created."
         }
       }
     },
     "abort": {
       "no_emitters": "No IR proxy emitters are loaded. Set up the core 'Infrared' integration plus an emitter (e.g. an ESPHome IR blaster) first.",
       "no_devices": "No devices found in the catalog. Add device files under <config>/customir_devices/ or install the bundled catalog.",
+      "no_devices_for_manufacturer": "No devices for the selected manufacturer — restart the wizard.",
       "unknown_device": "The selected device is no longer in the catalog. Try again.",
       "already_configured": "This device is already configured for that IR proxy."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Custom IR — options",
+        "description": "Compatibility settings for older IR emitter integrations.",
+        "data": {
+          "legacy_timings": "Legacy timing pairs (compatibility)"
+        },
+        "data_description": {
+          "legacy_timings": "Enable only if you see ‘'int' object has no attribute 'high_us'’ when pressing a button. This emits Timing(high_us=…, low_us=…) objects instead of the modern signed-µs ints — a workaround for emitter integrations still on infrared-protocols < 2.0.0. The proper fix is to update your emitter."
+        }
+      }
     }
   },
   "entity": {
