@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="icon.png" alt="Custom IR" width="160" height="160">
+</p>
+
 # Custom IR
 
 A HACS integration that lets you drive any IR-controlled device from Home Assistant
@@ -71,6 +75,25 @@ this integration's config flow will refuse to start.
 Copy `custom_components/hass_customir/` into `<config>/custom_components/`,
 restart, then add the integration from the UI.
 
+## The setup wizard, step by step
+
+After install, *Settings → Devices & Services → + Add Integration → Custom IR*
+walks you through two screens:
+
+1. **Manufacturer & emitter.** A type-ahead-searchable dropdown of every
+   manufacturer the loaded catalog covers (currently *LG*, *Nedis*, *Samsung*,
+   *Sony* in the bundled set, plus an *Other* bucket for user-supplied YAML
+   entries that have no manufacturer set), and an entity selector limited to
+   the `infrared` domain so you pick exactly one IR proxy.
+2. **Device model.** Once you've picked the manufacturer, a second
+   type-ahead-searchable dropdown shows just that manufacturer's models, with
+   the command count next to each entry. Submit and the integration creates
+   one `button` entity per command plus one `remote` entity.
+
+After setup, *Settings → Devices & Services → Custom IR → Configure* opens an
+options screen where you can flip the **Legacy timing pairs** compatibility
+toggle (see *Troubleshooting* below).
+
 ## Using a device from the bundled catalog
 
 The catalog is committed under
@@ -84,33 +107,48 @@ to **leverage open-source IR databases** — see the section below to grow it.
 
 ## Adding your own device
 
-Drop a YAML or JSON file into `<config>/customir_devices/`:
+> **Yes, custom devices are file-based today.** Defining IR timings is too
+> tedious to do through a config-flow form, and most users get them from a
+> capture (Flipper Zero, an IR receiver, an irdb dump or a Pronto-hex string)
+> that is already file-shaped. Drop the file in `<config>/customir_devices/`
+> and the wizard's *Manufacturer* dropdown will show it on the next open. The
+> integration **will not** invent or learn timings for you at runtime — that
+> requires receive-capable emitter hardware which the IR proxy platform
+> doesn't yet expose.
+
+A minimal YAML device file looks like this:
 
 ```yaml
 # <config>/customir_devices/my_old_panasonic.yaml
-key: my_old_panasonic
-manufacturer: Panasonic
-model: TC-P50ST60
+key: my_old_panasonic            # must be unique across the catalog
+manufacturer: Panasonic          # appears in the wizard step 1 dropdown
+model: TC-P50ST60                # appears in the wizard step 2 dropdown
 type: tv
 commands:
   power:
-    modulation: 38000
-    repeat_count: 0
-    timings: [3500, -1750, 450, -450, 450, -1300, 450, -450, ... ]
+    modulation: 38000            # carrier in Hz; 38 kHz is the IR default
+    repeat_count: 0              # 0 = single frame; 2 = the frame + 2 repeats
+    timings: [3500, -1750, 450, -450, 450, -1300, 450, -450 ]   # truncated
   volume_up:
     modulation: 38000
     repeat_count: 0
     timings: [...]
 ```
 
-Restart HA (or reload the integration) and your device will show up in the
-config-flow picker alongside the bundled ones.
-
 `timings` is a list of integers in microseconds: positive values are pulse-on,
-negative values are pulse-off (this matches
-`infrared_protocols.Command.get_raw_timings()`). If you have Pronto hex,
-use the [`tools/encoders/pronto.py`](tools/encoders/pronto.py) helper offline
-to convert it.
+negative values are pulse-off. This matches the contract of
+`infrared_protocols.Command.get_raw_timings()`. The same schema is enforced at
+config-flow time and by `python tools/validate_catalog.py`.
+
+### Where to get timings
+
+| Source | Workflow |
+|---|---|
+| **Flipper Zero `.ir` capture** | `python tools/migrate_flipper.py --src /path/to.ir` writes a JSON device file directly into the bundled catalog. Move it to `<config>/customir_devices/` if you want a user file instead. |
+| **probonopd/irdb CSV** | `python tools/migrate_irdb.py --src /path/to/irdb_clone --manufacturer <name>` |
+| **Pronto hex** | Run `python -c "import sys; sys.path.insert(0,'tools'); from encoders.pronto import encode_pronto; print(encode_pronto('0000 006D 0022 0002 ...'))"` and paste the resulting list into your YAML's `timings:`. |
+| **Raw IR receiver capture** | Whatever tool you used probably already gives you alternating µs pulse/space pairs; just sign-alternate them so pulses are positive and spaces negative. |
+| **Manual encoding (NEC/RC5/RC6/SIRC/Samsung32)** | Use the matching encoder under [`tools/encoders/`](tools/encoders/) — they all return the right list shape. |
 
 ## Growing the catalog from open-source IR databases
 
@@ -155,6 +193,49 @@ python tools/validate_catalog.py
 ```
 
 to sanity-check the schema and rebuild `index.json`.
+
+## Troubleshooting
+
+### `Failed to perform the action button/press. 'int' object has no attribute 'high_us'`
+
+This error comes from the **emitter integration**, not from Custom IR. It
+means whichever IR proxy you paired with is iterating the timings and trying
+to access `.high_us` / `.low_us` on each entry — the *old* contract that
+`infrared-protocols` 1.x used. The library was [refactored to flat signed-int
+timings in 2.0.0](https://github.com/home-assistant-libs/infrared-protocols/pull/19)
+on 2026-04-20, and HA core 2026.4 pins that version. Custom IR (and HA core's
+own `lg_infrared`) emit the new shape; emitter integrations that haven't
+caught up will hit this.
+
+**The proper fix** is for the emitter integration to consume `list[int]`. If
+you're on HA core's `esphome`, `broadlink`, or another official emitter,
+update Home Assistant first.
+
+**Workaround (compatibility toggle)** — if you're stuck on a stale emitter:
+
+1. *Settings → Devices & Services → Custom IR → Configure*.
+2. Tick **Legacy timing pairs (compatibility)** and submit.
+3. Press a button again.
+
+This switches our runtime to emit objects exposing `.high_us` and `.low_us`,
+restoring the old wire shape. It's strictly a workaround — the integration
+will print a deprecation hint in your HA log when this mode is in use.
+
+### Buttons appear unavailable
+
+Their `available` state mirrors the emitter entity. If `infrared.your_emitter`
+is `unavailable` (e.g. the ESPHome device dropped offline), every button and
+the remote entity bound to it will be `unavailable` too. Reconnect the
+emitter and they'll come back without restarting HA.
+
+### My device isn't in the dropdown
+
+Either the bundled catalog doesn't have it yet (PRs welcome — see the
+*Growing the catalog* section), or you have a YAML/JSON file in
+`<config>/customir_devices/` that failed schema validation. Check the HA log
+for `Skipping malformed device file:` warnings. Run
+`python tools/validate_catalog.py` to re-validate everything in the bundled
+tree.
 
 ## Verification
 

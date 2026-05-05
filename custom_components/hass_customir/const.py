@@ -9,6 +9,12 @@ DOMAIN: Final = "hass_customir"
 
 CONF_INFRARED_ENTITY_ID: Final = "infrared_entity_id"
 CONF_DEVICE_KEY: Final = "device_key"
+CONF_MANUFACTURER: Final = "manufacturer"
+CONF_LEGACY_TIMINGS: Final = "legacy_timings"
+DEFAULT_LEGACY_TIMINGS: Final = False
+
+# Synthetic "manufacturer" sentinel for devices that have none set.
+MANUFACTURER_OTHER: Final = "__other__"
 
 # Bundled catalog is committed alongside the integration source.
 BUNDLED_CATALOG_DIR: Final = Path(__file__).parent / "catalog"

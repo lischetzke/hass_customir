@@ -14,8 +14,8 @@ from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.event import async_track_state_change_event
 
 from .catalog import DeviceDef
-from .commands import RawCommand
-from .const import DOMAIN
+from .commands import LegacyRawCommand, RawCommand
+from .const import CONF_LEGACY_TIMINGS, DEFAULT_LEGACY_TIMINGS, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -33,6 +33,7 @@ class HassCustomIrEntity(Entity):
         unique_id_suffix: str,
     ) -> None:
         """Initialize."""
+        self._entry = entry
         self._infrared_entity_id = infrared_entity_id
         self._device = device
         self._attr_unique_id = f"{entry.entry_id}_{unique_id_suffix}"
@@ -82,13 +83,25 @@ class HassCustomIrEntity(Entity):
                 f"Device '{self._device.key}' has no command '{command_name}'. "
                 f"Known commands: {sorted(self._device.commands)}"
             )
+        legacy = self._entry.options.get(CONF_LEGACY_TIMINGS, DEFAULT_LEGACY_TIMINGS)
+        if legacy:
+            cmd_cls: type = LegacyRawCommand
+            _LOGGER.debug(
+                "Legacy timing-pair compatibility mode in use for %s; the "
+                "proper fix is for the emitter integration on %s to consume "
+                "list[int] timings (infrared-protocols >= 2.0.0).",
+                self.entity_id,
+                self._infrared_entity_id,
+            )
+        else:
+            cmd_cls = RawCommand
         await async_send_command(
             self.hass,
             self._infrared_entity_id,
-            RawCommand(
+            cmd_cls(
                 modulation=cmd_def.modulation,
                 repeat_count=cmd_def.repeat_count,
-                timings=cmd_def.timings,
+                timings=list(cmd_def.timings),
             ),
             context=self._context,
         )
