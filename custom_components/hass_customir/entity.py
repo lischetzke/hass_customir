@@ -75,33 +75,69 @@ class HassCustomIrEntity(Entity):
             ir_state is not None and ir_state.state != STATE_UNAVAILABLE
         )
 
+    def _build_command(
+        self, cmd_def, *, legacy: bool
+    ) -> RawCommand | LegacyRawCommand:
+        cmd_cls = LegacyRawCommand if legacy else RawCommand
+        return cmd_cls(
+            modulation=cmd_def.modulation,
+            repeat_count=cmd_def.repeat_count,
+            timings=list(cmd_def.timings),
+        )
+
     async def _send(self, command_name: str) -> None:
-        """Look up a command by name and send it through the IR proxy."""
+        """Look up a command by name and send it through the IR proxy.
+
+        If the user has explicitly enabled the legacy compatibility option
+        we use it directly. Otherwise we send the modern ``list[int]`` shape
+        and, only on the first :class:`AttributeError` complaining about
+        ``high_us`` (i.e. an emitter still on the pre-2.0 ``infrared-
+        protocols`` API), persist ``legacy_timings=True`` to the config entry
+        so subsequent presses skip the failed attempt.
+        """
         cmd_def = self._device.commands.get(command_name)
         if cmd_def is None:
             raise HomeAssistantError(
                 f"Device '{self._device.key}' has no command '{command_name}'. "
                 f"Known commands: {sorted(self._device.commands)}"
             )
+
         legacy = self._entry.options.get(CONF_LEGACY_TIMINGS, DEFAULT_LEGACY_TIMINGS)
-        if legacy:
-            cmd_cls: type = LegacyRawCommand
-            _LOGGER.debug(
-                "Legacy timing-pair compatibility mode in use for %s; the "
-                "proper fix is for the emitter integration on %s to consume "
-                "list[int] timings (infrared-protocols >= 2.0.0).",
-                self.entity_id,
-                self._infrared_entity_id,
-            )
-        else:
-            cmd_cls = RawCommand
+
+        if not legacy:
+            try:
+                await async_send_command(
+                    self.hass,
+                    self._infrared_entity_id,
+                    self._build_command(cmd_def, legacy=False),
+                    context=self._context,
+                )
+                return
+            except AttributeError as err:
+                if "high_us" not in str(err) and "low_us" not in str(err):
+                    raise
+                _LOGGER.warning(
+                    "Auto-enabling legacy timing-pair mode for %s — emitter "
+                    "%s is on the pre-2.0 infrared-protocols API "
+                    "(it accessed .high_us on a timing element). The proper "
+                    "fix is to update Home Assistant / your emitter "
+                    "integration; until then we'll keep using legacy timing "
+                    "pairs.",
+                    self.entity_id,
+                    self._infrared_entity_id,
+                )
+                self.hass.config_entries.async_update_entry(
+                    self._entry,
+                    options={
+                        **self._entry.options,
+                        CONF_LEGACY_TIMINGS: True,
+                    },
+                )
+                legacy = True
+
         await async_send_command(
             self.hass,
             self._infrared_entity_id,
-            cmd_cls(
-                modulation=cmd_def.modulation,
-                repeat_count=cmd_def.repeat_count,
-                timings=list(cmd_def.timings),
-            ),
+            self._build_command(cmd_def, legacy=True),
             context=self._context,
         )
