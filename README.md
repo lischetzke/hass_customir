@@ -198,28 +198,26 @@ to sanity-check the schema and rebuild `index.json`.
 
 ### `Failed to perform the action button/press. 'int' object has no attribute 'high_us'`
 
-This error comes from the **emitter integration**, not from Custom IR. It
-means whichever IR proxy you paired with is iterating the timings and trying
-to access `.high_us` / `.low_us` on each entry — the *old* contract that
-`infrared-protocols` 1.x used. The library was [refactored to flat signed-int
-timings in 2.0.0](https://github.com/home-assistant-libs/infrared-protocols/pull/19)
-on 2026-04-20, and HA core 2026.4 pins that version. Custom IR (and HA core's
-own `lg_infrared`) emit the new shape; emitter integrations that haven't
-caught up will hit this.
+This error comes from the **emitter integration**, not from Custom IR. The
+`infrared-protocols` library was
+[refactored to flat signed-int timings in 2.0.0](https://github.com/home-assistant-libs/infrared-protocols/pull/19)
+on 2026-04-20. Home Assistant releases that pre-date the matching update of
+`homeassistant/components/esphome/infrared.py` (early 2026.4 builds) still
+iterate the timings expecting `.high_us` / `.low_us` attributes per element.
 
-**The proper fix** is for the emitter integration to consume `list[int]`. If
-you're on HA core's `esphome`, `broadlink`, or another official emitter,
-update Home Assistant first.
+**Custom IR handles this automatically since v0.2.0.** The first time a
+press fails with this `AttributeError`, the integration logs a warning,
+flips the **Legacy timing pairs** option on for that entry, and retries
+with the old wire shape — every subsequent press goes straight to the
+legacy shape. You shouldn't need to do anything besides press the button
+once more.
 
-**Workaround (compatibility toggle)** — if you're stuck on a stale emitter:
-
-1. *Settings → Devices & Services → Custom IR → Configure*.
-2. Tick **Legacy timing pairs (compatibility)** and submit.
-3. Press a button again.
-
-This switches our runtime to emit objects exposing `.high_us` and `.low_us`,
-restoring the old wire shape. It's strictly a workaround — the integration
-will print a deprecation hint in your HA log when this mode is in use.
+If you'd rather force the mode (e.g. you don't want to wait for the first
+attempt to fail), or you've already updated HA and want to switch back to
+the modern shape, go to *Settings → Devices & Services → Custom IR →
+Configure* and toggle **Legacy timing pairs** explicitly. The proper fix
+remains updating Home Assistant so its emitter integration consumes
+`list[int]`.
 
 ### Buttons appear unavailable
 
@@ -266,6 +264,28 @@ pulse-off). At runtime we wrap each list in a tiny `RawCommand` subclass of
 domain forwards the timings to whichever `InfraredEntity` you picked, which
 modulates them at the carrier frequency and drives the IR LED. There is no
 protocol decoding at runtime — pre-encoding happens once, in the migrator.
+
+## Releases
+
+Custom IR is versioned per [SemVer](https://semver.org/) and changes are
+recorded in [`CHANGELOG.md`](CHANGELOG.md).
+
+HACS only surfaces **published GitHub releases** by default — without a
+release tag, users stay on whatever version their HACS card was last
+pointed at. Releases are cut from `master`:
+
+```bash
+# After the PR is merged
+git checkout master && git pull
+# Bump custom_components/hass_customir/manifest.json::version and CHANGELOG.md
+git tag -a vX.Y.Z -m "vX.Y.Z"
+git push origin vX.Y.Z
+gh release create vX.Y.Z --title "vX.Y.Z" --notes-from-tag
+```
+
+The `version` field in [`manifest.json`](custom_components/hass_customir/manifest.json)
+must match the tag (without the `v` prefix). HACS reads it as the
+"installed version" string in the UI.
 
 ## Credits & licences
 
